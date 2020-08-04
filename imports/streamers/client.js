@@ -1,0 +1,1 @@
+export const streamClient = new Meteor.Streamer('client',{retransmit :false});

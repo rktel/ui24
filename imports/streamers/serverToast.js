@@ -1,0 +1,1 @@
+export const serverToast = new Meteor.Streamer('serverToast',{retransmit :false});
