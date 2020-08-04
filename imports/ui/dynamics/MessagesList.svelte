@@ -14,32 +14,32 @@
 
   export let currentUser;
   export const openModalDevices = () => core.openModalDevices();
-
+  let messagesSize = 0;
   $: devices = useTracker(() =>
     Devices.find({}, { sort: { createdAt: -1 } }).fetch()
   );
-  $: messages_group = useTracker(() => {
-    if (core["groupSelected"]) {
-      setTimeout(() => {
-        document.querySelector(".chat").scrollBy(0, 10000);
-      }, 50);
-    }
-    return MessagesGroup.find({}, { sort: { createdAt: -1 } }).fetch();
-  });
-  // $: single_messages_group = useTracker(() => {
-  //   setTimeout(() => {
-  //     document.querySelector(".chat").scrollBy(0, 10000);
-  //   }, 100);
-  //   return MessagesGroup.find({}).fetch();
-  // });
+  $: messages_group = useTracker(() =>
+    MessagesGroup.find({}, { sort: { createdAt: -1 } }).fetch()
+  );
+
   $: {
     if ($devices.length) {
       core["devicesFiltered"] = $devices.filter(
         item => item.mobileID.indexOf(core["inputSearch"]) !== -1
       );
     }
+    if (core["groupSelected"]) {
+      if(messagesSize!= $messages_group.find(element => element['nameGroup'] === core['groupSelected'].nameGroup).messages.length){
+        console.log($messages_group.find(element => element['nameGroup'] === core['groupSelected'].nameGroup).messages.length)
+       // document.querySelector(".chat").scrollBy(0, 10000)
+        const messageBody = document.querySelector('#chat');
+        setTimeout(()=>{
+          messageBody.scrollTop = messageBody.scrollHeight - messageBody.clientHeight;
+        },50)
+        messagesSize = $messages_group.find(element => element['nameGroup'] === core['groupSelected'].nameGroup).messages.length
+      }
+    }
 
-    // console.log('coreGroupSelected:',core['groupSelected'])
   }
 
   const init = () => {
@@ -47,14 +47,10 @@
       M.toast({ html: msgFromServer });
     });
     core.setModalInstance();
-    // setTimeout(() => {
-    //   core["showList"] = true;
-    // }, 1000);
+ 
   };
   const core = {
     groupSelected: null,
-    // showListModal: false,
-    //showList: false,
     modalInstance: null,
     modalDevicesInstance: null,
 
@@ -91,29 +87,12 @@
       // CHAT MODAL
       core.modalInstance.open();
       core["groupSelected"] = group;
-      //  Meteor.subscribe(
-      //   "single_messages_group",
-      //   currentUser.username,
-      //   core["groupSelected"].nameGroup
-      // );
-      // setTimeout(() => {
-      //   document.querySelector(".chat").scrollBy(0, 10000);
-      // }, 50);
-      //Meteor.subscribe('single_messages_group', currentUser.username, core['groupSelected']);
-      // setTimeout(() => {
-      //   core["showListModal"] = true;
-      // }, 1000);
-      // setTimeout(() => {
-      //   document.querySelector("#inputMessage").focus();
-      // }, 150);
     },
     closeModal: () => {
       // CHAT MODAL
       core.modalInstance.close();
       core["groupSelected"] = null;
       core["inputMessage"] = "";
-
-      //core["showListModal"] = false;
     },
     destroyModal: () => {
       core.modalInstance.destroy();
@@ -220,7 +199,7 @@
     width: 100%;
     max-height: 100%;
   }
-  .chat {
+  #chat {
     overflow-y: auto;
     background-color: #f4f4f4;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Cg fill='%23cccccc' fill-opacity='0.4'%3E%3Cpath fill-rule='evenodd' d='M11 0l5 20H6l5-20zm42 31a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM0 72h40v4H0v-4zm0-8h31v4H0v-4zm20-16h20v4H20v-4zM0 56h40v4H0v-4zm63-25a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm10 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM53 41a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm10 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm10 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-30 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-28-8a5 5 0 0 0-10 0h10zm10 0a5 5 0 0 1-10 0h10zM56 5a5 5 0 0 0-10 0h10zm10 0a5 5 0 0 1-10 0h10zm-3 46a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm10 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zM21 0l5 20H16l5-20zm43 64v-4h-4v4h-4v4h4v4h4v-4h4v-4h-4zM36 13h4v4h-4v-4zm4 4h4v4h-4v-4zm-4 4h4v4h-4v-4zm8-8h4v4h-4v-4z'/%3E%3C/g%3E%3C/svg%3E");
@@ -277,7 +256,7 @@
       </li>
     {/if}
   </ul>
-  <div class="chat" style="height:{Meteor.innerHeight - 68 - 56}px">
+  <div id="chat" style="height:{Meteor.innerHeight - 68 - 56}px">
     {#if $messages_group.length && core['groupSelected']}
       {#each $messages_group.find(element => element['nameGroup'] === core['groupSelected'].nameGroup).messages as item}
         <Bubble data={item} />
@@ -337,7 +316,12 @@
             class="collection-item"
             class:selected={core['devicesSelected'].includes(device.mobileID)}
             on:click={core.addDevice(device.mobileID)}>
-            <div style="max-width:95%; overflow-x:auto;">{device.mobileID}</div>
+            <div style="max-width:95%; overflow-x:auto;">
+              {device.mobileID}
+              <span class="secondary-content">
+                {device.updatedAt && format(device.updatedAt, 'HH:mm:ss dd/MM/yyyy')}
+              </span>
+            </div>
           </li>
         {/each}
       </div>
