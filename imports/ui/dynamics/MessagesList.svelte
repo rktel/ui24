@@ -18,9 +18,14 @@
   $: devices = useTracker(() =>
     Devices.find({}, { sort: { createdAt: -1 } }).fetch()
   );
-  $: messages_group = useTracker(() =>
-    MessagesGroup.find({}, { sort: { createdAt: -1 } }).fetch()
-  );
+  $: messages_group = useTracker(() => {
+    if (core["groupSelected"]) {
+      setTimeout(() => {
+        document.querySelector(".chat").scrollBy(0, 10000);
+      }, 50);
+    }
+    return MessagesGroup.find({}, { sort: { createdAt: -1 } }).fetch();
+  });
   // $: single_messages_group = useTracker(() => {
   //   setTimeout(() => {
   //     document.querySelector(".chat").scrollBy(0, 10000);
@@ -33,12 +38,7 @@
         item => item.mobileID.indexOf(core["inputSearch"]) !== -1
       );
     }
-    if ($messages_group.length && core["groupSelected"]) {
-      setTimeout(() => {
-        document.querySelector(".chat").scrollBy(0, 10000);
-      }, 50);
-      // console.log($messages_group.find(element => element['nameGroup']===core['groupSelected'].nameGroup).messages);
-    }
+
     // console.log('coreGroupSelected:',core['groupSelected'])
   }
 
@@ -47,15 +47,14 @@
       M.toast({ html: msgFromServer });
     });
     core.setModalInstance();
-    setTimeout(() => {
-      core["showList"] = true;
-    }, 1000);
+    // setTimeout(() => {
+    //   core["showList"] = true;
+    // }, 1000);
   };
   const core = {
     groupSelected: null,
-
-    showListModal: false,
-    showList: false,
+    // showListModal: false,
+    //showList: false,
     modalInstance: null,
     modalDevicesInstance: null,
 
