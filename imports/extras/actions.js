@@ -40,11 +40,11 @@ export function longtouch(node, threshold = 500) {
 			node.removeEventListener('touchend', cancel);
 		};
 		
-		node.addEventListener('touchmove', cancel);
-		node.addEventListener('touchend', cancel);
+		node.addEventListener('touchmove', cancel,  {passive: true});
+		node.addEventListener('touchend', cancel,  {passive: true});
 	}
 	
-	node.addEventListener('touchstart', handle_touchdown);
+	node.addEventListener('touchstart', handle_touchdown,  {passive: true});
 	
 	return {
 		destroy() {

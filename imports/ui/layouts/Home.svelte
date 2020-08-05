@@ -30,7 +30,7 @@
       }
     },
     openDevicesForMessages: () => {
-      targetMessages.openModalDevices();
+      targetMessages.openDialogDevices();
     },
     closeDevicesForMessages: () => {}
   };

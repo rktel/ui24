@@ -1,7 +1,7 @@
 <script>
   import { Meteor } from "meteor/meteor";
   import { navigate } from "svelte-navaid";
-
+  import {appHeight} from '../../stores/appStore.js'
   const loginCore = {
     onLogin: () => {
       loginCore.user["password"] &&
@@ -39,7 +39,7 @@
   }
 </style>
 
-<div class="main" style="height: {Meteor.innerHeight}px">
+<div class="main" style="height: {$appHeight}px">
   <form class="z-depth-2" on:submit|preventDefault={loginCore.onLogin}>
     <div class="row">
       <div class="col s12 logo" style="margin-bottom:50px">
