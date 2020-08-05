@@ -31,5 +31,5 @@ Meteor.methods({
 })
 
 function getResponse(_message){
-    return '>R' + _message.slice(2, _message.indexOf('<')) +';ID=';
+    return '>R' + _message.slice(2, _message.indexOf('<'));
   }
