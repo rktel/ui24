@@ -20,6 +20,7 @@
     onLogout: () => {
       Meteor.logout(error => {
         if (!error) {
+          console.log('logout')
           navigate("/login");
         }
       });

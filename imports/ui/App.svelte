@@ -11,10 +11,13 @@
   import { appHeight } from "../stores/appStore";
 
   const init = () => {
-    console.log(new Date(), "############  App ready ###############");
     appHeight.set(window.innerHeight);
-    Meteor.userId() && navigate("/");
-    !Meteor.userId() && navigate("/login");
+    console.log(new Date(), "############  App ready ###############");
+    if (Meteor.userId()) {
+      navigate("/");
+    } else {
+      navigate("/login");
+    }
   };
   const onResize = () => {
     appHeight.set(window.innerHeight);
