@@ -160,8 +160,8 @@
     height: 100%;
     width: 100%;
     display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: min-content 1fr min-content;
+    grid-template-columns: 100%;
+    grid-template-rows: 200px 1fr 200px;
   }
   .dialog-bottom {
     margin: 0;
