@@ -37,7 +37,7 @@
     overflow-x: hidden;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 20px 60px;
+    grid-template-rows: 20px 70px;
     margin: 10px;
     padding: 10px;
 
