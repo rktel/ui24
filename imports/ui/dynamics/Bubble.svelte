@@ -37,7 +37,7 @@
     overflow-x: hidden;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 20px 50px;
+    grid-template-rows: 20px 60px;
     margin: 10px;
     padding: 10px;
 
@@ -64,7 +64,7 @@
   <div class="input-container">
     <div class="input">
       <div class="id">{data.id}</div>
-      <div class="message">{data.message}</div>
+      <div class="message">{data.message} </div>
       <div class="createdAt">{format(data.createdAt, 'HH:mm:ss dd/MM/yyyy')}</div>
     </div>
   </div>
@@ -72,7 +72,7 @@
   <div class="output-container">
     <div class="output">
       <div class="id">{data.id}</div>
-      <div class="message">{data.message}</div>
+      <div class="message">{data.message} <br> => {data.mobileID && data.mobileID}</div>
       <div class="createdAt">{format(data.createdAt, 'HH:mm:ss dd/MM/yyyy')}</div>
     </div>
   </div>

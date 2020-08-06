@@ -13,9 +13,9 @@ Meteor.methods({
     'messages_group.remove': function (_nameGroup) {
         MessagesGroup.remove({ nameGroup: _nameGroup });
     },
-    'messages_groupOut.update': function (_nameGroup, _user, _message) {
-        MessagesGroup.update({ nameGroup: _nameGroup }, { $push: { messages: { responseInclude: getResponse(_message), type: 'out', id: _user, message: _message, createdAt: new Date() } } })
-        MessagesGroup.update({ nameGroup: _nameGroup }, { $set: { messageOut: { responseInclude: getResponse(_message), type: 'out', id: _user, message: _message, createdAt: new Date() } } })
+    'messages_groupOut.update': function (_nameGroup, _user, _message, _mobileID) {
+        MessagesGroup.update({ nameGroup: _nameGroup }, { $push: { messages: { responseInclude: getResponse(_message), type: 'out', id: _user, message: _message, createdAt: new Date(), mobileID: _mobileID } } })
+        MessagesGroup.update({ nameGroup: _nameGroup }, { $set: { messageOut: { responseInclude: getResponse(_message), type: 'out', id: _user, message: _message, createdAt: new Date(), mobileID: _mobileID } } })
     },
     'messages_groupIn.update': function (_mobileID, _message) {
         const messages_group = MessagesGroup.find({ mobileIDArray: _mobileID, messageOut: { $exists: true } });
@@ -30,6 +30,6 @@ Meteor.methods({
     },
 })
 
-function getResponse(_message){
+function getResponse(_message) {
     return '>R' + _message.slice(2, _message.indexOf('<'));
-  }
+}

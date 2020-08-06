@@ -34,7 +34,7 @@ export function serverTCP(_serverInstance, _portServer, _hostServer = '0.0.0.0')
                 if (writeMessageSuccess) {
                     console.log(socketConnected.mobileID, 'comando ', _messageOut, 'enviado!');
                     Meteor.call('messages_out.insert',_user, _nameGroup, _messageOut, _mobileID);
-                    Meteor.call('messages_groupOut.update',_nameGroup, _user, _messageOut);
+                    Meteor.call('messages_groupOut.update',_nameGroup, _user, _messageOut, _mobileID);
                 } else {
                     console.log(socketConnected.mobileID, ' Error al enviar comando ', _messageOut)
                 }
