@@ -73,7 +73,7 @@
       messagesSize = 0;
     },
     inputMessage: "",
-    onKeyupInputMessage: event => event.keyCode === 13 && core.onSendMessage(),
+   // onKeyupInputMessage: event => event.keyCode === 13 && core.onSendMessage(),
     onSendMessage: () => {
       if (core["inputMessage"].trim()) {
         console.log('onSendMessage groupSelected:', core["groupSelected"])
@@ -213,7 +213,7 @@
           type="text"
           placeholder="Message..."
           bind:value={core['inputMessage']}
-          on:keyup={core.onKeyupInputMessage} />
+           />
         <a
           href="#!"
           style="color:{core['inputMessage'].trim() ? '#039be5' : 'gray'}"
