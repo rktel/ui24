@@ -9,7 +9,7 @@ import { Meteor } from 'meteor/meteor';
 export function serverTCP(_serverInstance, _portServer, _hostServer = '0.0.0.0') {
     // CONSTANTS
     const SOCKET_TIMEOUT = 1000 * 60 * 2;
-    const SOCKET_KEEPALIVE = 1000 * 20;
+    const SOCKET_KEEPALIVE = 1000 * 10;
     const server = _serverInstance();
 
     server.listen(_portServer, _hostServer, () => console.log('Server TCP ready!'));
