@@ -154,6 +154,7 @@
     border: none;
     margin: 0;
     padding: 0;
+    z-index: 2000;
   }
   .dialogMain {
     height: 100%;
