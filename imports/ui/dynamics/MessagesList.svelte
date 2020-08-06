@@ -161,7 +161,7 @@
     width: 100%;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: max-content 1fr max-content;
+    grid-template-rows: min-content 1fr min-content;
   }
   .dialog-bottom {
     margin: 0;
