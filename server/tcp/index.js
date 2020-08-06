@@ -76,7 +76,7 @@ function parseData(data) {
 
 
         if (unit) {
-            console.log(unit);
+            // console.log(unit);
             if (data.toString().includes('>REV') || data.toString().includes('>RET')) {
                 // EVENT REPORT
             }
