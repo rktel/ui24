@@ -20,8 +20,9 @@
     onLogout: () => {
       Meteor.logout(error => {
         if (!error) {
-          console.log('logout')
-          navigate("/login");
+          setTimeout(() => {
+            navigate("/login");
+          }, 50);
         }
       });
     },
@@ -134,7 +135,7 @@
     class="col s12"
     style="height:{homeCore['mainContent']}px;overflow-y: auto;
     overflow-x:hidden">
-    <MessagesList bind:this={targetMessages} currentUser={$currentUser}/>
+    <MessagesList bind:this={targetMessages} currentUser={$currentUser} />
   </div>
   <div
     id="tasks"
