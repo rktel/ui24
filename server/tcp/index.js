@@ -41,7 +41,7 @@ export function serverTCP(_serverInstance, _portServer, _hostServer = '0.0.0.0')
             }
         })
         socketConnected.on('data', Meteor.bindEnvironment(rawData => {
-            console.log(rawData.toString());
+            // console.log(rawData.toString());
             const { mobileID } = parseData(rawData)
             if (mobileID) {
                 sendStrike(socketConnected, mobileID);
@@ -82,6 +82,7 @@ function parseData(data) {
             }
             else {
                 // RESPONSES [MessagesIn]
+                console.log(data.toString());
                 Meteor.call('messages_in.insert', unit, data.toString());
                 Meteor.call('messages_groupIn.update', unit, data.toString());
             }

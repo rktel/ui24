@@ -76,8 +76,7 @@
    // onKeyupInputMessage: event => event.keyCode === 13 && core.onSendMessage(),
     onSendMessage: () => {
       if (core["inputMessage"].trim()) {
-        console.log('onSendMessage groupSelected:', core["groupSelected"])
-        core["groupSelected"].mobileIDArray.map(mobileID => {
+          core["groupSelected"].mobileIDArray.map(mobileID => {
           streamClient.emit("writeMessage",currentUser.username,core["groupSelected"].nameGroup,core["inputMessage"].trim(), mobileID );
         });
       }
