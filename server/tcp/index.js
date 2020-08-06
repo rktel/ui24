@@ -8,7 +8,7 @@ import { Meteor } from 'meteor/meteor';
 
 export function serverTCP(_serverInstance, _portServer, _hostServer = '0.0.0.0') {
     // CONSTANTS
-    const SOCKET_TIMEOUT = 1000 * 60 * 60;
+    const SOCKET_TIMEOUT = 1000 * 60 ;
     const SOCKET_KEEPALIVE = 1000 * 5;
     const server = _serverInstance();
 
@@ -29,15 +29,24 @@ export function serverTCP(_serverInstance, _portServer, _hostServer = '0.0.0.0')
         socketConnected.setTimeout(SOCKET_TIMEOUT);
         // From Client message to mobileID (device)
         streamClient.on('writeMessage', (_user, _nameGroup, _messageOut, _mobileID) => {
-            if (socketConnected.mobileID === _mobileID) {
-                const writeMessageSuccess = socketConnected.write(_messageOut)
+            if (!socketConnected.destroyed && socketConnected.mobileID === _mobileID) {
+                const writeMessageSuccess = socketConnected.write(_messageOut,Meteor.bindEnvironment(()=>{
+                    console.log(socketConnected.mobileID, 'comando ', _messageOut, 'enviado!');
+                    Meteor.call('messages_out.insert', _user, _nameGroup, _messageOut, _mobileID);
+                    Meteor.call('messages_groupOut.update', _nameGroup, _user, _messageOut, _mobileID);
+                }))
+                if(!writeMessageSuccess){
+                    console.log('Error Flush data command:', socketConnected.mobileID)
+                }
+                /*
                 if (writeMessageSuccess) {
                     console.log(socketConnected.mobileID, 'comando ', _messageOut, 'enviado!');
-                    Meteor.call('messages_out.insert',_user, _nameGroup, _messageOut, _mobileID);
-                    Meteor.call('messages_groupOut.update',_nameGroup, _user, _messageOut, _mobileID);
+                    Meteor.call('messages_out.insert', _user, _nameGroup, _messageOut, _mobileID);
+                    Meteor.call('messages_groupOut.update', _nameGroup, _user, _messageOut, _mobileID);
                 } else {
                     console.log(socketConnected.mobileID, ' Error al enviar comando ', _messageOut)
                 }
+*/
             }
         })
         socketConnected.on('data', Meteor.bindEnvironment(rawData => {
@@ -54,7 +63,10 @@ export function serverTCP(_serverInstance, _portServer, _hostServer = '0.0.0.0')
                 }
             }
         }))
-        socketConnected.on('timeout', () => { });
+        socketConnected.on('timeout', () => {
+            console.log('socket timeout:', socketConnected.mobileID);
+            socketConnected.destroy();
+        });
         socketConnected.on('close', (closeError) => { });
         socketConnected.on('error', () => { });
         socketConnected.on('end', () => { });
