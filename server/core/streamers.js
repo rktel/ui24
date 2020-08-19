@@ -4,4 +4,5 @@ import { serverToast } from '../../imports/streamers/serverToast'
 
 streamClient.allowWrite('writeMessage', 'logged');
 
-serverToast.allowRead('toast', 'logged');
+serverToast.allowRead('all');
+serverToast.allowWrite('all');

@@ -5,12 +5,24 @@
   import { Roles } from "meteor/alanning:roles";
   import { navigate } from "svelte-navaid";
   import MessagesList from "../dynamics/MessagesList.svelte";
+  import TasksList from "../dynamics/TasksList.svelte";
+  import ScriptsList from "../dynamics/ScriptsList.svelte";
+  import { Devices } from "../../api/devices/collection.js";
+  import { Scripts } from "../../api/scripts/collection.js";
 
   let targetMessages;
+  let targetTasks;
+  let targetScripts;
 
   $: currentUser = useTracker(() => Meteor.user());
   $: userIsAdmin = useTracker(() =>
     Roles.userIsInRole(Meteor.userId(), "admin")
+  );
+  $: devices = useTracker(() =>
+    Devices.find({}, { sort: { createdAt: -1 } }).fetch()
+  );
+  $: scripts = useTracker(() =>
+    Scripts.find({}, { sort: { createdAt: -1 } }).fetch()
   );
 
   const homeCore = {
@@ -18,7 +30,7 @@
     dropdownInstances: undefined,
     mainContent: 0,
     onLogout: () => {
-      Meteor.logout(error => {
+      Meteor.logout((error) => {
         if (!error) {
           setTimeout(() => {
             navigate("/login");
@@ -29,22 +41,34 @@
     onActionButton: () => {
       if (homeCore["tabsInstance"].index === 0) {
         homeCore.openDevicesForMessages();
+      } else if (homeCore["tabsInstance"].index === 1) {
+        homeCore.openDevicesForTasks();
+      } else if (homeCore["tabsInstance"].index === 2) {
+        homeCore.openNewScript();
       }
     },
     openDevicesForMessages: () => {
       targetMessages.openDialogDevices();
     },
-    closeDevicesForMessages: () => {}
+    openDevicesForTasks: () => {
+      targetTasks.openDialogDevices();
+    },
+    closeDevicesForMessages: () => {},
+    openNewScript: () => {
+      targetScripts.openDialogNewScript();
+    },
   };
 
-  const initNav = event => {
+  const initNav = (event) => {
     Meteor.subscribe("role");
+    Meteor.subscribe("devices");
+    Meteor.subscribe('scripts');
     homeCore["mainContent"] = window.innerHeight - event.offsetHeight;
-    setTimeout(_ => {
+    setTimeout((_) => {
       homeCore["tabsInstance"] = M.Tabs.init(
         document.querySelector("ul.tabs"),
         {
-          swipeable: false
+          swipeable: false,
         }
       );
       homeCore["dropdownInstances"] = M.Dropdown.init(
@@ -53,7 +77,7 @@
     }, 150);
   };
 
-  const onResize = event => {
+  const onResize = (event) => {
     homeCore["mainContent"] =
       window.innerHeight - document.querySelector("#nav").offsetHeight;
   };
@@ -135,21 +159,31 @@
     class="col s12"
     style="height:{homeCore['mainContent']}px;overflow-y: auto;
     overflow-x:hidden">
-    <MessagesList bind:this={targetMessages} currentUser={$currentUser} />
+    <MessagesList
+      bind:this={targetMessages}
+      currentUser={$currentUser}
+      devices={$devices} />
   </div>
   <div
     id="tasks"
     class="col s12"
     style="height:{homeCore['mainContent']}px;overflow-y: auto;
     overflow-x:hidden">
-    Tasks
+    <TasksList
+      bind:this={targetTasks}
+      currentUser={$currentUser}
+      devices={$devices}
+      scripts={$scripts} />
   </div>
   <div
     id="scripts"
     class="col s12"
     style="height:{homeCore['mainContent']}px;overflow-y: auto;
     overflow-x:hidden">
-    Scripts
+    <ScriptsList
+      bind:this={targetScripts}
+      currentUser={$currentUser}
+      scripts={$scripts} />
   </div>
   {#if userIsAdmin}
     <div

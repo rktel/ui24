@@ -1,7 +1,6 @@
 <script>
   import { Meteor } from "meteor/meteor";
   import { useTracker } from "meteor/rdb:svelte-meteor-data";
-  import { Devices } from "../../api/devices/collection";
   import { MessagesGroup } from "../../api/messages_group/collection";
 
   import { appHeight } from "../../stores/appStore";
@@ -11,87 +10,91 @@
   import { longpress, longtouch } from "../../extras/actions";
 
   import { format } from "date-fns";
-  import { fade } from "svelte/transition";
+  import { fade, fly } from "svelte/transition";
   import Bubble from "./Bubble.svelte";
 
   export let currentUser;
-  export const openDialogDevices = () => core.openDialogDevices();
-  let messagesSize = 0;
+  export let devices;
+  export const openDialogDevices = () => methods.openDialogDevices();
 
-  $: devices = useTracker(() =>
-    Devices.find({}, { sort: { createdAt: -1 } }).fetch()
-  );
+
   $: messages_group = useTracker(() =>
     MessagesGroup.find({}, { sort: { createdAt: -1 } }).fetch()
   );
 
   $: {
-    if ($devices.length) {
-      core["devicesFiltered"] = $devices.filter(
-        item => item.mobileID.indexOf(core["inputSearch"]) !== -1
+    if (devices.length) {
+      data["devicesFiltered"] = devices.filter(
+        item => item.mobileID.indexOf(data["inputSearch"]) !== -1
       );
     }
-    if (core["groupSelected"]) {
-      if (messagesSize != $messages_group.find(element => element["nameGroup"] === core["groupSelected"].nameGroup).messages.length) {
+    if (data["groupSelected"]) {
+      if (data['messagesSize'] != $messages_group.find(element => element["nameGroup"] === data["groupSelected"].nameGroup).messages.length) {
          
         setTimeout(() => {
           const messageBody = document.querySelector("#chat");
           messageBody.scrollTop =  messageBody.scrollHeight - messageBody.clientHeight
           }, 50);
-        messagesSize = $messages_group.find(element => element["nameGroup"] === core["groupSelected"].nameGroup).messages.length;
+        data['messagesSize'] = $messages_group.find(element => element["nameGroup"] === data["groupSelected"].nameGroup).messages.length;
       }
     }
   }
 
   const init = () => {
-    serverToast.on("toast", msgFromServer => {
-      M.toast({ html: msgFromServer });
+    serverToast.on("toast", () => {
+      M.toast({ html: 'msgFromServer' });
     });
   
   };
-  const core = {
+  const data = {
+    messagesSize : 0,
+    inputMessage: "",
+    inputGroup: "",
     groupSelected: null,
-    openDialogDevices: () => {
+    inputSearch: "",
+    devicesFiltered: [],
+    devicesSelected: [],
+  }
+  const methods={
+      openDialogDevices: () => {
       document.querySelector("#dialogDevices").showModal();
     },
     closeDialogDevices: () => {
       
       document.querySelector("#dialogDevices").close();
-      core["inputGroup"] = "";
-      core["inputSearch"] = "";
-      core["devicesFiltered"] = [];
-      core["devicesSelected"] = [];
+      data["inputGroup"] = "";
+      data["inputSearch"] = "";
+      data["devicesFiltered"] = [];
+      data["devicesSelected"] = [];
     },
     openDialogChat: group => {
-      core["groupSelected"] = group;
+      data["groupSelected"] = group;
       document.querySelector("#dialogChat").showModal();
     },
     closeDialogChat: () => {
-      core["groupSelected"] = null;
-      core["inputMessage"] = "";
+      data["groupSelected"] = null;
+      data["inputMessage"] = "";
       document.querySelector("#dialogChat").close();
-      messagesSize = 0;
+      data['messagesSize'] = 0;
     },
-    inputMessage: "",
-   // onKeyupInputMessage: event => event.keyCode === 13 && core.onSendMessage(),
     onSendMessage: () => {
-      if (core["inputMessage"].trim()) {
-          core["groupSelected"].mobileIDArray.map(mobileID => {
-          streamClient.emit("writeMessage",currentUser.username,core["groupSelected"].nameGroup,core["inputMessage"].trim(), mobileID );
+      if (data["inputMessage"].trim()) {
+          data["groupSelected"].mobileIDArray.map(mobileID => {
+          streamClient.emit("writeMessage",currentUser.username,data["groupSelected"].nameGroup,data["inputMessage"].trim(), mobileID );
         });
       }
     },
-    inputGroup: "",
+    
     onSendGroup: () => {
-      if (core["inputGroup"].trim() && core["devicesSelected"].length) {
-        Meteor.call("messages_group.insert", currentUser.username,core["inputGroup"].trim(), core["devicesSelected"],
+      if (data["inputGroup"].trim() && data["devicesSelected"].length) {
+        Meteor.call("messages_group.insert", currentUser.username,data["inputGroup"].trim(), data["devicesSelected"],
           (error, ok) => {
             if (!error && !ok) {
               M.toast({
-                html: `Grupo ${core["inputGroup"].trim()} ya existe!`
+                html: `Grupo ${data["inputGroup"].trim()} ya existe!`
               });
             } else {
-              core.closeDialogDevices();
+              methods.closeDialogDevices();
             }
           }
         );
@@ -100,18 +103,17 @@
     onRemoveGroup: nameGroup => {
       Meteor.call("messages_group.remove", nameGroup);
     },
-    inputSearch: "",
-    devicesFiltered: [],
-    devicesSelected: [],
+
     addDevice: device => {
-      if (!core["devicesSelected"].includes(device)) {
-        core["devicesSelected"] = [device, ...core["devicesSelected"]];
+      if (!data["devicesSelected"].includes(device)) {
+        data["devicesSelected"] = [device, ...data["devicesSelected"]];
       } else {
-        core["devicesSelected"].splice(core["devicesSelected"].indexOf(device), 1);
-        core["devicesSelected"] = core["devicesSelected"];
+        data["devicesSelected"].splice(data["devicesSelected"].indexOf(device), 1);
+        data["devicesSelected"] = data["devicesSelected"];
       }
     }
-  };
+  }
+
 
 </script>
 
@@ -177,21 +179,21 @@
     class="dialog"
     id="dialogChat"
     style="height:{$appHeight}px"
-    transition:fade>
+    in:fly="{{ y: 200, duration: 500 }}" out:fade>
     <div class="dialogMain">
       <div class="dialog-header">
         <ul class="collection" style="margin:0">
-          {#if core['groupSelected']}
+          {#if data['groupSelected']}
             <li class="collection-item avatar">
               <i class="material-icons circle green">insert_chart</i>
-              <span class="title">{core['groupSelected'].nameGroup}</span>
+              <span class="title">{data['groupSelected'].nameGroup}</span>
               <p style="max-width:80%; overflow-x:auto;">
-                {core['groupSelected'].mobileIDArray}
+                {data['groupSelected'].mobileIDArray}
               </p>
               <a
                 href="#!"
                 class="secondary-content grey-text"
-                on:click={core.closeDialogChat}>
+                on:click={methods.closeDialogChat}>
                 <i class="material-icons" style="font-size:36px">
                   highlight_off
                 </i>
@@ -201,23 +203,25 @@
         </ul>
       </div>
       <div id="chat" class="dialog-container">
-        {#if $messages_group.length && core['groupSelected']}
-          {#each $messages_group.find(element => element['nameGroup'] === core['groupSelected'].nameGroup).messages as item}
+
+        {#if $messages_group.length && data['groupSelected']}
+          {#each $messages_group.find(element => element['nameGroup'] === data['groupSelected'].nameGroup).messages as item}
             <Bubble data={item} />
           {/each}
         {/if}
+        
       </div>
       <div class="dialog-bottom">
         <input
           id="inputMessage"
           type="text"
           placeholder="Message..."
-          bind:value={core['inputMessage']}
+          bind:value={data['inputMessage']}
            />
         <a
           href="#!"
-          style="color:{core['inputMessage'].trim() ? '#039be5' : 'gray'}"
-          on:click={core.onSendMessage}>
+          style="color:{data['inputMessage'].trim() ? '#039be5' : 'gray'}"
+          on:click={methods.onSendMessage}>
           <i class="material-icons" style="font-size:30px;">send</i>
         </a>
       </div>
@@ -230,25 +234,20 @@
     class="dialog"
     id="dialogDevices"
     style="height:{$appHeight}px"
-    transition:fade>
-    {#await Meteor.subscribe('devices')}
-      <div class="progress blue">
-        <div class="indeterminate" />
-      </div>
-    {:then OK}
-
-      <div class="dialogMain">
+    in:fly="{{ y: 200, duration: 500 }}" out:fade>
+    {#if devices.length}
+   <div class="dialogMain">
         <div class="dialog-header">
           <ul class="collection" style="margin:0">
             <li class="collection-item avatar">
               <span class="title">Devices</span>
               <p>
-                {core['devicesSelected'].length} seleccionados de {$devices.length}
+                {data['devicesSelected'].length} seleccionados de {devices.length}
               </p>
               <a
                 href="#!"
                 class="secondary-content grey-text"
-                on:click={core.closeDialogDevices}>
+                on:click={methods.closeDialogDevices}>
                 <i class="material-icons" style="font-size:36px">
                   highlight_off
                 </i>
@@ -261,18 +260,18 @@
                 id="inputSearch"
                 type="text"
                 placeholder="Buscar..."
-                bind:value={core.inputSearch} />
+                bind:value={data['inputSearch']} />
             </li>
           </ul>
 
         </div>
         <div class="dialog-container" style="overflow-y:auto;">
           <ul class="collection" style="margin:0">
-            {#each core['devicesFiltered'] as device}
+            {#each data['devicesFiltered'] as device}
               <li
                 class="collection-item"
-                class:selected={core['devicesSelected'].includes(device.mobileID)}
-                on:click={core.addDevice(device.mobileID)}>
+                class:selected={data['devicesSelected'].includes(device.mobileID)}
+                on:click={methods.addDevice(device.mobileID)}>
                 <div style="max-width:95%; overflow-x:auto;">
                   {device.mobileID}
                   <span class="secondary-content">
@@ -289,16 +288,20 @@
             id="inputGroup"
             type="text"
             placeholder="Group..."
-            bind:value={core['inputGroup']} />
+            bind:value={data['inputGroup']} />
           <a
             href="#!"
-            style="color:{core['inputGroup'].trim() && core['devicesSelected'].length ? '#039be5' : 'gray'}"
-            on:click={core.onSendGroup}>
+            style="color:{data['inputGroup'].trim() && data['devicesSelected'].length ? '#039be5' : 'gray'}"
+            on:click={methods.onSendGroup}>
             <i class="material-icons" style="font-size:30px;">done</i>
           </a>
         </div>
       </div>
-    {/await}
+    {:else}
+      <div class="progress blue">
+        <div class="indeterminate" />
+      </div>
+    {/if}
   </dialog>
 
 
@@ -312,11 +315,11 @@
     {#each $messages_group as msg_group}
       <li
         class="collection-item avatar"
-        on:dblclick={core.openDialogChat(msg_group)}
+        on:dblclick={methods.openDialogChat(msg_group)}
         use:longpress={5000}
-        on:longpress={core.onRemoveGroup(msg_group.nameGroup)}
+        on:longpress={methods.onRemoveGroup(msg_group.nameGroup)}
         use:longtouch={5000}
-        on:longtouch={core.onRemoveGroup(msg_group.nameGroup)}>
+        on:longtouch={methods.onRemoveGroup(msg_group.nameGroup)}>
         <i class="material-icons circle green">insert_chart</i>
         <span class="title">{msg_group.nameGroup}</span>
         <p style="max-width:80%; overflow-x:hidden;">

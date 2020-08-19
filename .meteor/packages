@@ -20,3 +20,4 @@ alanning:roles
 rocketchat:streamer
 underscore
 rdb:svelte-meteor-data
+autoupdate
