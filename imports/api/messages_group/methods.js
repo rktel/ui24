@@ -22,7 +22,7 @@ Meteor.methods({
         if (messages_group) {
             messages_group.map(group => {
                 const messageOut = group.messageOut;
-                if (_message.includes(messageOut.responseInclude) || _message.includes('>RER')) {
+                if (_message.includes(messageOut.responseInclude) ) {
                     MessagesGroup.update({ nameGroup: group.nameGroup }, { $push: { messages: { type: 'in', id: _mobileID, message: _message, createdAt: new Date() } } })
                 }
             })
@@ -31,5 +31,6 @@ Meteor.methods({
 })
 
 function getResponse(_message) {
-    return '>R' + _message.slice(2, _message.indexOf('<'));
+    
+    return _message.slice(2, _message.indexOf('<'));
 }

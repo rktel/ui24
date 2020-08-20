@@ -1,30 +1,44 @@
 <script>
   import { format } from "date-fns";
+  import { onMount } from "svelte";
   export let data;
+  onMount(() => {
+    const elems = document.querySelectorAll(".collapsible");
+    const instances = M.Collapsible.init(elems);
+  });
 </script>
 
-<style>
-  .container {
-    padding: 12px;
-    margin: 12px;
-    display: flex;
-    flex-direction: column;
-  }
-</style>
+<ul class="collapsible">
 
-{#if data.length}
-  <div class="container">
-    <div>{data.mobileID}</div>
-    <div>
-      <span>{data.percent}% {data.index + 1} de {data.total}</span>
+  <li>
+    <div class="collapsible-header">
+      <ul class="collection" style="width:100%">
+        <li class="collection-item avatar">
+          <i class="material-icons circle orange">collections_bookmark</i>
+          <span class="title">{data.mobileID}</span>
+          <p style="overflow-x:auto;">
+            <span class="progress">
+              <span class="determinate" style="width: {data.percent}%" />
+            </span>
+            <br />
+            {data.percent}% [ {data.meter} de {data.script.length} lineas ]
+            <br />
+            Inicio: {format(data.createdAt, 'HH:mm:ss dd/MM/yyyy')}
+            <br>
+            Fin: {data.endedAt && format(data.endedAt, 'HH:mm:ss dd/MM/yyyy')} 
+          </p>
+        </li>
+      </ul>
     </div>
-    <div class="progress">
-      <div class="determinate" style="width:{data.percent}%" />
+    <div class="collapsible-body" style="background-color: white">
+      {#each data.script as element}
+        <p style="overflow-x:auto;">{element.index}_message.- {element.message}</p>
+        <p style="overflow-x:auto;">{element.index}_response.- {element.response}</p>
+        <br />
+      {/each}
     </div>
-    <div>
-      <span>{data.currentMessage}</span>
-      <br />
-      <span>{data.sendTime}</span>
-    </div>
-  </div>
-{/if}
+  </li>
+
+</ul>
+
+

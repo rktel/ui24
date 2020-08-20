@@ -57,6 +57,29 @@ export function serverTCP(_serverInstance, _portServer, _hostServer = '0.0.0.0')
                                // Tasks.update({mobileID: socketConnected.mobileID, 'script.state': 0},{$set:{'script.$.state': 1}})
                             }))
                         }
+                        const allStateTwo = daScript.filter(element => element.state === 2)
+                        const lengthStateTwo = allStateTwo.length
+                        const percent = lengthStateTwo === 0 ? 0 : parseInt(100*lengthStateTwo / daScript.length)
+
+                        Tasks.update({mobileID: socketConnected.mobileID},{$set:{percent: percent, meter: lengthStateTwo}})
+                        if(percent === 100){
+                           const tasksEnd = Tasks.findOne( { mobileID: socketConnected.mobileID, endedAt: { $exists: true } } )
+                           if(!tasksEnd){
+                            Tasks.update({mobileID: socketConnected.mobileID},{$set:{endedAt: new Date()}})
+                           }
+                               // 
+                            
+                            // Meteor.clearInterval(intervalInstance);
+                        }
+                        // let total = 0;
+                        //     daScript.map(element => total = total + element.state)
+                        // if(2*daScript.length === total){
+                        //     Eh Fin
+                        // }
+
+                        // if(!daMessageStateOld && !daMessageStateOne){
+                        //     Eh Fin
+                        // }
 
                     }else{
                         // clearInterval(intervalInstance);

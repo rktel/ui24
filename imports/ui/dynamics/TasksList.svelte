@@ -103,7 +103,7 @@
     },
   };
 
-  const init = () => {};
+
 </script>
 
 <style>
@@ -204,9 +204,11 @@
       </ul>
     </div>
     <div id="progress" class="dialog-container">
-      {#if $tasks}
-  Peppa
-      {/if}
+      {#each $tasks as task}
+        <Progress data={task}/>
+        {:else}
+        <h4>Nothing</h4>
+      {/each}
 
       <!-- {#if $tasks_group.length && data['groupSelected']}
         {#each $tasks_group.find((element) => element['nameGroup'] === data['groupSelected'].nameGroup).tasks as item}
@@ -218,7 +220,7 @@
   </div>
 </dialog>
 <!-- ############################ TASKS GROUP ########################## -->
-<ul class="collection" use:init>
+<ul class="collection" >
   {#await Meteor.subscribe('tasks_group', currentUser.username)}
     <div class="progress">
       <div class="indeterminate" />
