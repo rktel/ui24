@@ -19,6 +19,9 @@ import '../imports/api/tasks/publish';
 // STREAM SERVER
 import {serverToast} from '../imports/streamers/serverToast'
 
+//USERS
+import '../imports/api/users/publish'
+
 import './core/streamers';
 import { serverTCP } from './tcp'
 import { createServer } from 'net';

@@ -36,4 +36,6 @@ Meteor.methods({
 function getResponse(_message) {
    return _message.slice(2, _message.indexOf('<'));
    // return '>R' + _message.slice(2, _message.indexOf('<'));
+   // SGS0210267
+   // SXAGH00
 }

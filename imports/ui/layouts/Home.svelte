@@ -9,10 +9,12 @@
   import ScriptsList from "../dynamics/ScriptsList.svelte";
   import { Devices } from "../../api/devices/collection.js";
   import { Scripts } from "../../api/scripts/collection.js";
+  import UsersList from '../dynamics/UsersList.svelte';
 
   let targetMessages;
   let targetTasks;
   let targetScripts;
+  let targetUsers;
 
   $: currentUser = useTracker(() => Meteor.user());
   $: userIsAdmin = useTracker(() =>
@@ -24,6 +26,9 @@
   $: scripts = useTracker(() =>
     Scripts.find({}, { sort: { createdAt: -1 } }).fetch()
   );
+  $: users = useTracker(()=>
+    Meteor.users.find({}).fetch()
+  )
 
   const homeCore = {
     tabsInstance: undefined,
@@ -45,6 +50,8 @@
         homeCore.openDevicesForTasks();
       } else if (homeCore["tabsInstance"].index === 2) {
         homeCore.openNewScript();
+      } else if(homeCore["tabsInstance"].index === 3){
+        homeCore.openDialogUsers();
       }
     },
     openDevicesForMessages: () => {
@@ -57,12 +64,16 @@
     openNewScript: () => {
       targetScripts.openDialogNewScript();
     },
+    openDialogUsers:()=>{
+      targetUsers.openDialogUsers();
+    }
   };
 
   const initNav = (event) => {
     Meteor.subscribe("role");
     Meteor.subscribe("devices");
     Meteor.subscribe('scripts');
+    Meteor.subscribe('daUsers');
     homeCore["mainContent"] = window.innerHeight - event.offsetHeight;
     setTimeout((_) => {
       homeCore["tabsInstance"] = M.Tabs.init(
@@ -112,7 +123,7 @@
 {#if $currentUser}
   <ul id="nav-menu" class="dropdown-content">
     <li>
-      <a href="#!">one</a>
+      <a href="#!">{$currentUser.username}</a>
     </li>
     <li class="divider" />
     <li on:click={homeCore.onLogout}>
@@ -125,7 +136,7 @@
       <span class="left brand-logo">F</span>
       <ul class="right">
         <li style="margin-right:20px;">
-          <input id="search" type="text" placeholder="Buscar..." />
+          <!-- <input id="search" type="text" placeholder="Buscar..." /> -->
         </li>
         <li>
           <a href="#!" class="dropdown-trigger" data-target="nav-menu">
@@ -145,11 +156,11 @@
         <li class="tab">
           <a href="#scripts">Scripts</a>
         </li>
-        {#if userIsAdmin}
+ 
           <li class="tab">
             <a href="#users">Users</a>
           </li>
-        {/if}
+      
       </ul>
     </div>
   </nav>
@@ -185,15 +196,15 @@
       currentUser={$currentUser}
       scripts={$scripts} />
   </div>
-  {#if userIsAdmin}
+
     <div
       id="users"
       class="col s12"
       style="height:{homeCore['mainContent']}px;overflow-y: auto;
       overflow-x:hidden">
-      Users
+      <UsersList users={$users} bind:this={targetUsers}/>
     </div>
-  {/if}
+  
   <div class="fixed-action-btn" on:click={homeCore.onActionButton}>
     <a href="#!" class="btn-floating btn-large red">
       <i class="large material-icons">add</i>
